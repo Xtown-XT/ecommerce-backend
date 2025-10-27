@@ -28,8 +28,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sequelize = new Sequelize("ecom", "kavi", "kaviya28@", {
-  host: "127.0.0.1",
+const sequelize = new Sequelize("ecommerce", "ramya", "ramya", {
+  host: "192.168.1.150",
   port: 3306,
   dialect: "mysql",
 });

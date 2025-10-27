@@ -36,14 +36,15 @@ const Customer = sequelize.define("Customer", {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
+    allowNull:false,
   },
   phone: {
-    type: DataTypes.STRING(15),
+    type: DataTypes.STRING,
     allowNull: false,
     unique: true,
   },
   otp: {
-    type: DataTypes.STRING(6),
+    type: DataTypes.STRING,
     allowNull: true,
   },
   otpExpiry: {

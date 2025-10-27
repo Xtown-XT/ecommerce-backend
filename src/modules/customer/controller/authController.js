@@ -246,6 +246,35 @@ export const verifyOTP = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+//create
+// export const createProfile = async (req, res) => {
+//   try {
+//     // Only allow certain fields
+//     const creatableFields = [
+//       "phone",
+//       "password",
+//       "firstName",
+//       "lastName",
+//       "email",
+//       "address",
+//       "country",
+//       "state",
+//       "city",
+//       "pincode",
+//     ];
+
+//     const createData = {};
+//     creatableFields.forEach((field) => {
+//       if (req.body[field] !== undefined) createData[field] = req.body[field];
+//     });
+
+//     const customer = await Customer.create(createData);
+//     res.json({ message: "Profile created successfully", customer });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 // Update profile
 export const updateProfile = async (req, res) => {

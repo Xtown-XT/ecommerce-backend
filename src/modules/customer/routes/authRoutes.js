@@ -29,6 +29,7 @@ router.post("/verify", verifyOTP);
 // router.get("/profile", authenticateCustomer, getProfile);
 
 // Update logged-in customer's profile
+// router.post("/profile",verifyToken,createProfile )
 router.put("/profile", verifyToken, updateProfile);
 
 // // Get all customers (admin purpose)

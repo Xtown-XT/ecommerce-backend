@@ -47,7 +47,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import sequelize from './src/db/index.js'; // default export
-import authRoutes from '../ecommerce-project/src/modules/customer/routes/authRoutes.js';
+// import authRoutes from '../ecommerce-project/src/modules/customer/routes/authRoutes.js';
 import errorHandler from '../ecommerce-project/src/middleware/errorHandler.js';
 
 dotenv.config();
