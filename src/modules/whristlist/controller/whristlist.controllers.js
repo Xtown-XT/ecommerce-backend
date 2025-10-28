@@ -1,4 +1,4 @@
-import { Wishlist } from "../models/whristlist.js";
+import Wishlist from "../../whristlist/models/whristlist.js"; // ✅ fixed import
 
 export const createWishlist = async (req, res) => {
   try {
@@ -36,7 +36,7 @@ export const updateWishlist = async (req, res) => {
     if (!wishlist)
       return res.status(404).json({ status: "error", message: "Wishlist not found" });
 
-    await wishlist.update({ ...req.body, updated_at: new Date() });
+    await wishlist.update({ ...req.body, updated_By: "system" });
     res.json({ status: "success", data: wishlist });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });

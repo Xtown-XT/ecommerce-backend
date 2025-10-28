@@ -15,6 +15,7 @@ import orderItemRoutes from '../src/modules/orderMaster/routes/index.js'
 import notificationRoutes from '../src/modules/notification/routes/index.js'
 import returnDamageRoutes from '../src/modules/retrun/routes/index.js'
 import wishlistRoutes from '../src/modules/whristlist/routes/index.js'
+import productRoutes from '../src/modules/products/routes/index.js'
 const app = express();
 
 // app.use(express.urlencoded({ extended: true })); 
@@ -59,6 +60,8 @@ app.use("/ecommerce_api/v1", notificationRoutes);
 app.use("ecommerce_api/v1", returnDamageRoutes);
 //whristlist
 app.use("ecommerce_api/v1", wishlistRoutes);
+//products
+app.use("ecommerce_api/v1", productRoutes);
 
 app.use((req, res) => {
   return res.sendError('Route not found', 404);
