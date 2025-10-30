@@ -1,10 +1,27 @@
+// import { z } from "zod";
+
+// export const createNotificationSchema = z.object({
+//   id: z.number().int().optional(),
+//   customer_id: z.uuid(),
+//   title: z.string().min(1),
+//   message: z.string().min(1),
+//   is_read: z.boolean().optional(),
+// });
+
+// export const updateNotificationSchema = z.object({
+//   title: z.string().optional(),
+//   message: z.string().optional(),
+//   is_read: z.boolean().optional(),
+// });
+
 import { z } from "zod";
 
 export const createNotificationSchema = z.object({
-  id: z.number().int().optional(),
-  customer_id: z.uuid(),
-  title: z.string().min(1),
-  message: z.string().min(1),
+  // ✅ No need for "id" — Sequelize auto-generates UUID
+  notification_id: z.string().uuid().optional(), 
+  customer_id: z.string().uuid({ message: "Invalid customer_id format" }),
+  title: z.string().min(1, "Title is required"),
+  message: z.string().min(1, "Message is required"),
   is_read: z.boolean().optional(),
 });
 
@@ -13,4 +30,3 @@ export const updateNotificationSchema = z.object({
   message: z.string().optional(),
   is_read: z.boolean().optional(),
 });
-

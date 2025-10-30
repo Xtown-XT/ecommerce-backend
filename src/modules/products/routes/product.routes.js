@@ -1,9 +1,9 @@
 import express from "express";
 import {
-  createProduct,
+  // createProduct,
   getProducts,
   getProduct,
-  updateProduct,
+  // updateProduct,
   deleteProduct,
 } from "../../products/controller/product.controller.js";
 
@@ -15,21 +15,20 @@ import {
   idSchema,
 } from "../../products/dto/product.validations.js";
 
-import { upload } from "../../../middleware/upload.js"; // for image upload
 
+// import { uploadProduct } from "../../../middleware/upload.js";
 const router = express.Router();
 
 
-
-// 🔒 Create Product (protected — only admin or superadmin)
-router.post(
-  "/add",
-  verifyToken,
-  // authorizeRole(["admin", "superadmin"]),
-  upload.array("images", 5), // allow multiple images
-  validate(createProductSchema),
-  createProduct
-);
+// // 🔒 Create Product (protected — only admin or superadmin)
+// router.post(
+//   "/add",
+//   verifyToken,
+//   // authorizeRole(["admin", "superadmin"]),
+//   uploadProduct.array("images", 5), // allow multiple images
+//   validate(createProductSchema),
+//   createProduct
+// );
 
 // 🔒 Get All Products (protected — any authenticated user)
 router.get(
@@ -48,15 +47,15 @@ router.get(
   getProduct
 );
 
-// 🔒 Update Product (protected — only admin or superadmin)
-router.put(
-  "/:id",
-  verifyToken,
-  // authorizeRole(["admin", "superadmin"]),
-  upload.array("images", 5),
-  validate(updateProductSchema),
-  updateProduct
-);
+// // 🔒 Update Product (protected — only admin or superadmin)
+// router.put(
+//   "/:id",
+//   verifyToken,
+//   // authorizeRole(["admin", "superadmin"]),
+//   uploadProduct.array("images", 5),
+//   validate(updateProductSchema),
+//   updateProduct
+// );
 
 // 🔒 Delete Product (protected — only admin or superadmin)
 router.delete(

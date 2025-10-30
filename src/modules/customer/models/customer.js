@@ -43,6 +43,7 @@ const Customer = sequelize.define("Customer", {
     allowNull: false,
     unique: true,
   },
+  
   otp: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -90,6 +91,10 @@ const Customer = sequelize.define("Customer", {
   },
   pincode: {
     type: DataTypes.STRING,
+    allowNull: true,
+  },
+  profile_image: {
+    type: DataTypes.STRING, // ✅ store file path or URL
     allowNull: true,
   },
   isActive: {

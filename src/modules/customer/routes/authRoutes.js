@@ -16,6 +16,7 @@ import {
   getAllCustomers
 } from "../controller/authController.js";
 import { verifyToken } from "../../../middleware/auth.js"; // optional, for profile routes
+import { uploadProfile } from "../../../middleware/upload.js";
 
 const router = express.Router();
 
@@ -34,6 +35,23 @@ router.put("/profile", verifyToken, updateProfile);
 
 // // Get all customers (admin purpose)
 router.get("/all", getAllCustomers);
+
+// router.put(
+//   "/profile",
+//   verifyToken,
+//   uploadProfile.single("profile_image"),
+//   updateProfile
+// );
+
+// ✅ Update profile with form-data
+router.put(
+  "/profile",
+  verifyToken, // must come first (to authenticate)
+  uploadProfile.single("profile_image"), // ✅ handles form-data
+  updateProfile
+);
+
+
 
 export default router;
 

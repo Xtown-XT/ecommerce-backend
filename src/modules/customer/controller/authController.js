@@ -1,292 +1,157 @@
-// import User from "../models/customer.js";
-// import { phoneSchema, otpSchema } from "../dto/authValidations.js";
 
-
-// // Generate random 6-digit OTP
-// const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-// // Register/Login with phone number
-// export const registerOrLogin = async (req, res) => {
-//   try {
-//     const { phone } = phoneSchema.parse(req.body);
-//     const otp = generateOtp();
-//     const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
-
-//     let user = await User.findOne({ where: { phone } });
-
-//     if (!user) {
-//       user = await User.create({ phone, otp, otpExpiresAt });
-//     } else {
-//       await user.update({ otp, otpExpiresAt });
-//     }
-
-//     // (In real app, send OTP via SMS)
-//     res.status(200).json({ message: "OTP sent", otp }); // show OTP for testing
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// };
-
-// // Verify OTP
-// export const verifyOtp = async (req, res) => {
-//   try {
-//     const { phone, otp } = otpSchema.parse(req.body);
-//     const user = await User.findOne({ where: { phone } });
-
-//     if (!user) return res.status(404).json({ message: "User not found" });
-
-//     if (user.otp !== otp)
-//       return res.status(400).json({ message: "Invalid OTP" });
-
-//     if (new Date() > user.otpExpiresAt)
-//       return res.status(400).json({ message: "OTP expired" });
-
-//     await user.update({ isVerified: true, otp: null, otpExpiresAt: null });
-//     res.json({ message: "OTP verified successfully", user });
-//   } catch (error) {
-//     res.status(400).json({ error: error.message });
-//   }
-// };
-
-
-// import Customer from "../models/customer.js";
-// import { generateOTP, hashPassword } from "../../../utils/auth.js";
-// import { sendEmailOTP, sendSMSOTP } from "../../../utils/sendOTP.js";
-// import { generateToken } from "../../../utils/jwt.js";
-// // import { updateProfileSchema } from "./customer.zod.js";
-
-// // Request OTP
-// export const requestOTP = async (req, res) => {
-//   try {
-//     const { phone } = req.body;
-//     if ( !phone) return res.status(400).json({ message: "Email or phone required" });
-
-//     let customer = await Customer.findOne({ where: {  phone, phone: phone } });
-//     if (!customer) {
-//       const password = generateOTP();
-//       customer = await Customer.create({  phone, password: await hashPassword(password) });
-//     }
-
-//     const otp = generateOTP();
-//     const expiry = new Date(Date.now() + 5 * 60 * 1000);
-//     await customer.update({ otp, otp_expiry: expiry, is_verified: false });
-
-//     // if (email) await sendEmailOTP(email, otp);
-//     if (phone) await sendSMSOTP(phone, otp);
-
-//     res.json({ message: "OTP sent successfully" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// export const verifyOTP = async (req, res) => {
-//   try {
-//     const {  phone, otp } = req.body;
-//     if (!otp || ( !phone))
-//       return res.status(400).json({ message: "Invalid request" });
-
-//     // find customer by email or phone
-//     const customer = await Customer.findOne({
-//       where: {   phone: phone || null },
-//     });
-//     if (!customer)
-//       return res.status(404).json({ message: "Customer not found" });
-
-//     // check OTP
-//     if (customer.otp !== otp)
-//       return res.status(400).json({ message: "Invalid OTP" });
-
-//     // check OTP expiry (fix field name)
-//     if (customer.otpExpiry && new Date() > customer.otpExpiry)
-//       return res.status(400).json({ message: "OTP expired" });
-
-//     // update verification status (fix field name)
-//     await customer.update({
-//       isVerified: true,
-//       otp: null,
-//       otpExpiry: null,
-//     });
-
-//     const token = generateToken({ id: customer.id });
-//     res.json({ message: "OTP verified successfully", token });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// export const updateProfile = async (req, res) => {
-//   try {
-//     const customer = req.customer;
-
-//     // ✅ Fix: use isVerified instead of is_verified
-//     if (!customer.isVerified) {
-//       return res.status(403).json({ message: "Customer not verified" });
-//     }
-
-//     await customer.update(req.body);
-//     res.json({ message: "Profile updated successfully", customer });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// // ✅ Get logged-in customer's profile
-// export const getProfile = async (req, res) => {
-//   try {
-//     const customer = req.customer;
-
-//     if (!customer)
-//       return res.status(404).json({ message: "Customer not found" });
-
-//     res.json({
-//       message: "Profile fetched successfully",
-//       customer,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-// // ✅ Get all customers (admin purpose)
-// export const getAllCustomers = async (req, res) => {
-//   try {
-//     const customers = await Customer.findAll({
-//       attributes: {
-//         exclude: ["password", "otp"], // don’t return sensitive info
-//       },
-//     });
-
-//     res.json({
-//       message: "All customers fetched successfully",
-//       total: customers.length,
-//       customers,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import Customer from "../models/customer.js";
 import { generateOTP, hashPassword } from "../../../utils/auth.js";
-import { sendEmailOTP, sendSMSOTP } from "../../../utils/sendOTP.js";
+import { sendSMSOTP } from "../../../utils/sendOTP.js";
 import { generateToken } from "../../../utils/jwt.js";
 
-// Request OTP
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET || "fallbackSecretKey";
+
+// ✅ Request OTP or Login with Password
 export const requestOTP = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { phone, password } = req.body;
     if (!phone) return res.status(400).json({ message: "Phone is required" });
 
     let customer = await Customer.findOne({ where: { phone } });
 
-    // Create customer if not exist
-    if (!customer) {
-      const password = generateOTP();
-      customer = await Customer.create({
-        phone,
-        password: await hashPassword(password),
-      });
+    // ✅ Case 1: If password not given → OTP flow
+    if (!password) {
+      // Create new customer if not exists
+      if (!customer) {
+        const tempPassword = generateOTP(); // temporary password
+        customer = await Customer.create({
+          phone,
+          password: await hashPassword(tempPassword),
+        });
+      }
+
+      // Generate OTP
+      const otp = generateOTP();
+      const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+      await customer.update({ otp, otpExpiry: expiry, verifyOtp: false });
+
+      // (In real app → await sendSMSOTP(phone, otp))
+      console.log(`📲 OTP for ${phone}: ${otp}`);
+
+      return res.json({ message: "OTP sent successfully", otp });
     }
 
-    // Generate OTP and expiry
-    const otp = generateOTP();
-    const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    // ✅ Case 2: Login with password
+    if (!customer)
+      return res.status(404).json({ message: "Customer not found" });
 
-    await customer.update({
-      otp,
-      otpExpiry: expiry,
-      verifyOtp: false,
-    });
+    const comparePass = await bcrypt.compare(password, customer.password);
+    if (!comparePass)
+      return res.status(401).json({ message: "Invalid password" });
 
-    // Send OTP via SMS
-    // await sendSMSOTP(phone, otp);
+    const token = generateToken(
+      { id: customer.id, phone: customer.phone },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
-    res.json({ message: "OTP sent successfully",otp });
+    return res.json({ message: "Login successful", token , customer});
   } catch (err) {
-    console.error(err);
+    console.error("❌ requestOTP error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Verify OTP
+// ✅ Verify OTP and Login
 export const verifyOTP = async (req, res) => {
   try {
     const { phone, otp } = req.body;
-    if (!phone || !otp) return res.status(400).json({ message: "Phone and OTP required" });
+    if (!phone || !otp)
+      return res.status(400).json({ message: "Phone and OTP required" });
 
     const customer = await Customer.findOne({ where: { phone } });
     if (!customer) return res.status(404).json({ message: "Customer not found" });
 
-    // Check OTP
-    if (customer.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
+    // Validate OTP
+    if (customer.otp !== otp)
+      return res.status(400).json({ message: "Invalid OTP" });
 
-    // Check expiry
     if (customer.otpExpiry && new Date() > customer.otpExpiry)
       return res.status(400).json({ message: "OTP expired" });
 
-    // Update verification status
-    await customer.update({
-      verifyOtp: true,
-      otp: null,
-      otpExpiry: null,
-    });
+    // Update verification
+    await customer.update({ verifyOtp: true, otp: null, otpExpiry: null });
 
-    const token = generateToken({ id: customer.id });
-    res.json({ message: "OTP verified successfully", token });
+    const token = generateToken(
+      { id: customer.id, phone: customer.phone },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ message: "OTP verified successfully", token , customer });
   } catch (err) {
-    console.error(err);
+    console.error("❌ verifyOTP error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
-//create
-// export const createProfile = async (req, res) => {
+
+// ✅ Update profile
+// export const updateProfile = async (req, res) => {
 //   try {
-//     // Only allow certain fields
-//     const creatableFields = [
-//       "phone",
-//       "password",
+//     const customer = req.customer;
+//     if (!customer.verifyOtp)
+//       return res.status(403).json({ message: "Customer not verified" });
+
+//     const allowedFields = [
 //       "firstName",
 //       "lastName",
 //       "email",
+//       "password",
 //       "address",
 //       "country",
 //       "state",
 //       "city",
 //       "pincode",
+//       "profile_image"
 //     ];
 
-//     const createData = {};
-//     creatableFields.forEach((field) => {
-//       if (req.body[field] !== undefined) createData[field] = req.body[field];
-//     });
+//     const updateData = {};
+//     for (const field of allowedFields) {
+//       if (req.body[field] !== undefined) updateData[field] = req.body[field];
+//     }
 
-//     const customer = await Customer.create(createData);
-//     res.json({ message: "Profile created successfully", customer });
+//     // Hash password if it's being updated
+//     if (updateData.password)
+//       updateData.password = await hashPassword(updateData.password);
+
+
+//     if (req.file) {
+//       const [compressedPath] = await compressImages([req.file], "customer");
+//       updateData.profile_image = compressedPath;
+//     }
+//     await customer.update(updateData);
+
+//     res.json({ message: "Profile updated successfully", customer });
 //   } catch (err) {
-//     console.error(err);
+//     console.error("❌ updateProfile error:", err);
 //     res.status(500).json({ message: "Server error" });
 //   }
 // };
 
-// Update profile
+// ✅ Update profile with form-data (including profile image upload)
 export const updateProfile = async (req, res) => {
   try {
+    // Ensure authenticated user
     const customer = req.customer;
+    if (!customer)
+      return res.status(401).json({ message: "Unauthorized: No customer found" });
 
-    if (!customer.verifyOtp) {
+    if (!customer.verifyOtp)
       return res.status(403).json({ message: "Customer not verified" });
-    }
 
-    // Only allow updating certain fields
-    const updatableFields = [
+    console.log("REQ BODY:", req.body);
+    console.log("REQ FILE:", req.file);
+
+    // ✅ Fields allowed to update
+    const allowedFields = [
       "firstName",
       "lastName",
       "email",
@@ -295,51 +160,70 @@ export const updateProfile = async (req, res) => {
       "country",
       "state",
       "city",
-      "pincode",
+      "pincode"
     ];
 
     const updateData = {};
-    updatableFields.forEach((field) => {
-      if (req.body[field] !== undefined) updateData[field] = req.body[field];
-    });
 
+    // ✅ Collect text fields from form-data
+    // for (const field of allowedFields) {
+    //   // if (req.body[field] && req.body[field].trim() !== "") {
+    //   //   updateData[field] = req.body[field];
+    //   // }
+    // }
+
+    // ✅ Hash password if updated
+    if (updateData.password) {
+      updateData.password = await hashPassword(updateData.password);
+    }
+
+    // ✅ Handle profile image upload (if file is sent)
+    if (req.file) {
+      const [compressedPath] = await compressImages([req.file], "customer");
+      updateData.profile_image = compressedPath;
+    }
+
+    // ✅ Update customer record
     await customer.update(updateData);
-    res.json({ message: "Profile updated successfully", customer });
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      data: customer,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ updateProfile error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
 
-
-// Get logged-in customer's profile
+// ✅ Get Profile
 export const getProfile = async (req, res) => {
   try {
     const customer = req.customer;
-    if (!customer) return res.status(404).json({ message: "Customer not found" });
+    if (!customer)
+      return res.status(404).json({ message: "Customer not found" });
 
     res.json({ message: "Profile fetched successfully", customer });
   } catch (err) {
-    console.error(err);
+    console.error("❌ getProfile error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get all customers (admin purpose)
+// ✅ Get All Customers
 export const getAllCustomers = async (req, res) => {
   try {
     const customers = await Customer.findAll({
       attributes: { exclude: ["password", "otp"] },
     });
-
     res.json({
       message: "All customers fetched successfully",
       total: customers.length,
       customers,
     });
   } catch (err) {
-    console.error(err);
+    console.error("❌ getAllCustomers error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

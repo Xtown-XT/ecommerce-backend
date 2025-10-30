@@ -7,14 +7,14 @@ const Notification = sequelize.define(
   {
     notification_id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4, // ✅ generates UUID automatically
+      defaultValue: DataTypes.UUIDV4, 
       primaryKey: true,
     },
     customer_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Customer, // ✅ directly reference model, not string
+        model: Customer, 
         key: "id",
       },
       onDelete: "CASCADE",
